@@ -27,15 +27,23 @@ int main(int argc, char *argv[])
 	int handle_fd;
 	struct stat64 bufstat;
         char buf[BUFSZ];
+	char *handle_file;
 	struct file_handle handle, *fh;
 
-	if(argc != 3)
+	if(argc != 2 && argc != 3)
 	{
-		fprintf(stderr, "Usage: %s, <mountdir> <handle-file>\n", argv[0]);
+		fprintf(stderr,
+			"Usage: %s, [<mountdir>] <handle-file>\n", argv[0]);
 		exit(1);
 	}
+	if (argc == 2)
+	{
+		mnt_fd = AT_FDCWD;
+		handle_file = argv[1];
+	} else
+		handle_file = argv[2];
 	/* read the handle from handle file */
-	handle_fd = open(argv[2], O_RDONLY);
+	handle_fd = open(handle_file, O_RDONLY);
 	if (handle_fd < 0)
 		perror("Error"), exit(1);
 
@@ -47,10 +55,11 @@ int main(int argc, char *argv[])
 	/* read the full handle now */
 	read(handle_fd, fh, sizeof(struct file_handle) + handle.handle_size);
 
-	mnt_fd = open(argv[1], O_RDONLY | O_DIRECTORY);
-	if(mnt_fd < 0)
-		perror("open"), exit(1);
-
+	if (argc != 2) {
+		mnt_fd = open(argv[1], O_RDONLY | O_DIRECTORY);
+		if(mnt_fd < 0)
+			perror("open"), exit(1);
+	}
 	printf("Reading the content now \n");
 	handle_stat(mnt_fd, fh, &bufstat);
 	ret = S_ISLNK(bufstat.st_mode);
