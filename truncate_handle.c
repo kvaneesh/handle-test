@@ -40,12 +40,12 @@ int main(int argc, char *argv[])
 		perror("Error"), exit(1);
 
 	read(handle_fd, &handle, sizeof(struct file_handle));
-	printf("Handle size read from %s is %d\n", argv[2], handle.handle_size);
+	printf("Handle size read from %s is %d\n", argv[2], handle.handle_bytes);
 
-	fh = malloc(sizeof(struct file_handle) + handle.handle_size);
+	fh = malloc(sizeof(struct file_handle) + handle.handle_bytes);
 	lseek(handle_fd, 0, SEEK_SET);
 	/* read the full handle now */
-	read(handle_fd, fh, sizeof(struct file_handle) + handle.handle_size);
+	read(handle_fd, fh, sizeof(struct file_handle) + handle.handle_bytes);
 
 	mnt_fd = open(argv[1], O_RDONLY | O_DIRECTORY);
 	if(mnt_fd < 0)

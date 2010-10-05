@@ -32,7 +32,7 @@
 #include <string.h>
 
 struct file_handle {
-        int handle_size;
+        unsigned int handle_bytes;
         int handle_type;
         unsigned char handle[0];
 };

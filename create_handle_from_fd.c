@@ -35,19 +35,19 @@ int main(int argc, char *argv[])
 	if(file_fd < 0)
 		perror("open"), exit(1);
 again:
-	if (fh && fh->handle_size) {
-		handle_sz = fh->handle_size;
+	if (fh && fh->handle_bytes) {
+		handle_sz = fh->handle_bytes;
 		free(fh);
 		fh = malloc(sizeof(struct file_handle) + handle_sz);
-		fh->handle_size = handle_sz;
+		fh->handle_bytes = handle_sz;
 	} else {
 		fh = malloc(sizeof(struct file_handle));
-		fh->handle_size = 0;
+		fh->handle_bytes = 0;
 	}
         errno  = 0;
         ret = fd_to_handle(file_fd, fh, &mnt_id);
         if (ret && errno == EOVERFLOW) {
-		printf("Found the handle size needed to be %d\n", fh->handle_size);
+		printf("Found the handle size needed to be %d\n", fh->handle_bytes);
 		goto again;
         } else if (ret) {
                 perror("Error:");
@@ -56,7 +56,7 @@ again:
 
 	/* write the handle to a handle.data file */
 	handle_fd = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, 0600);
-	write(handle_fd, fh, sizeof(*fh) + fh->handle_size);
+	write(handle_fd, fh, sizeof(*fh) + fh->handle_bytes);
 	printf("Handle value stored %s\n", argv[2]);
 
 	close(handle_fd);
