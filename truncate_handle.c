@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	int ret;
 	int fd, mnt_fd;
 	int handle_fd;
-	struct stat64 bufstat;
+	struct stat bufstat;
         char buf[BUFSZ];
 	struct file_handle handle, *fh;
 

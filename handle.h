@@ -39,6 +39,9 @@ struct file_handle {
 
 #define AT_FDCWD		-100
 #define AT_SYMLINK_FOLLOW	0x400
+#define O_NOACCESS     00000003
+#define __O_PATH       010000000
+#define O_PATH         (__O_PATH | O_NOACCESS)
 
 static inline int name_to_handle(const char *name, struct file_handle *fh, int *mnt_id)
 {
@@ -62,22 +65,46 @@ static inline int open_by_handle(int mountfd, struct file_handle *fh, int flags)
 
 static inline ssize_t handle_readlink(int mountfd, struct file_handle *fh, char *buf, size_t bufsize)
 {
-	return syscall(343, mountfd, fh, buf, bufsize);
+	int fd, ret;
+	fd = open_by_handle(mountfd, fh, O_PATH);
+	if (fd < 0)
+		return fd;
+	ret = readlinkat(fd, "", buf, bufsize);
+	close(fd);
+	return ret;
 }
 
-static inline int handle_stat(int mountfd, struct file_handle *fh, struct stat64 *buf)
+static inline int handle_stat(int mountfd, struct file_handle *fh, struct stat *buf)
 {
-	return syscall(344, mountfd, fh, buf);
+	int fd, ret;
+	fd = open_by_handle(mountfd, fh, O_PATH);
+	if (fd < 0)
+		return fd;
+	ret = fstat(fd, buf);
+	close(fd);
+	return ret;
 }
 
 static inline int handle_link(int mountfd, struct file_handle *fh, int newdirfd, char *newname)
 {
-	return syscall(345, mountfd, fh, newdirfd, newname);
+	int fd, ret;
+	fd = open_by_handle(mountfd, fh, O_PATH);
+	if (fd < 0)
+		return fd;
+	ret = linkat(fd, "", newdirfd, newname, 0);
+	close(fd);
+	return ret;
 }
 
 static inline int handle_chown(int mountfd, struct file_handle *fh, uid_t owner, gid_t group)
 {
-	return syscall(346, mountfd, fh, owner, group);
+	int fd, ret;
+	fd = open_by_handle(mountfd, fh, O_PATH);
+	if (fd < 0)
+		return fd;
+	ret = fchown(fd, owner, group);
+	close(fd);
+	return ret;
 }
 
 #endif
