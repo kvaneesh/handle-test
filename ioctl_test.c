@@ -18,12 +18,12 @@
  */
 
 #include "handle.h"
-
+#include <sys/ioctl.h>
 
 int main(int argc, char *argv[])
 {
 	int fd;
-	char buf[10];
+	loff_t size;
 
 	if(argc != 2)
 	{
@@ -31,14 +31,9 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	fd = open(argv[1], O_PATH);
-	if (unlinkat(fd, "", 0) == 0)
-		printf("Unlink Test failed\n");
+	if (!ioctl(fd, FIOQSIZE, &size))
+		printf("Test failed size returned %d\n", (int)size);
 	else
-		printf("Unlink test passed\n");
-
-	if (read(fd, buf, 10) >= 0)
-		printf("Read Test failed\n");
-	else
-		printf("Read test passed\n");
+		printf("Test pass\n");
 	return 0;
 }
