@@ -39,6 +39,7 @@ struct file_handle {
 
 #define AT_FDCWD		-100
 #define AT_SYMLINK_FOLLOW	0x400
+#define AT_EMPTY_PATH           0x1000
 #define O_NOACCESS     00000003
 #define __O_PATH       010000000
 #define O_PATH         (__O_PATH | O_NOACCESS)
@@ -80,7 +81,7 @@ static inline int handle_stat(int mountfd, struct file_handle *fh, struct stat *
 	fd = open_by_handle(mountfd, fh, O_PATH);
 	if (fd < 0)
 		return fd;
-	ret = fstat(fd, buf);
+	ret = fstatat(fd, "", buf, AT_EMPTY_PATH);
 	close(fd);
 	return ret;
 }
@@ -91,7 +92,7 @@ static inline int handle_link(int mountfd, struct file_handle *fh, int newdirfd,
 	fd = open_by_handle(mountfd, fh, O_PATH);
 	if (fd < 0)
 		return fd;
-	ret = linkat(fd, "", newdirfd, newname, 0);
+	ret = linkat(fd, "", newdirfd, newname, AT_EMPTY_PATH);
 	close(fd);
 	return ret;
 }
@@ -102,7 +103,7 @@ static inline int handle_chown(int mountfd, struct file_handle *fh, uid_t owner,
 	fd = open_by_handle(mountfd, fh, O_PATH);
 	if (fd < 0)
 		return fd;
-	ret = fchown(fd, owner, group);
+	ret = fchownat(fd, "", owner, group, AT_EMPTY_PATH);
 	close(fd);
 	return ret;
 }

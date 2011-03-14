@@ -31,10 +31,11 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	fd = open(argv[1], O_PATH);
-	if (unlinkat(fd, "", 0) == 0)
-		printf("Unlink Test failed\n");
-	else
+	if (unlinkat(AT_FDCWD, argv[1], 0) == 0)
 		printf("Unlink test passed\n");
+	else
+		printf("Unlink Test failed\n");
+
 
 	if (read(fd, buf, 10) >= 0)
 		printf("Read Test failed\n");
