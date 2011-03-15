@@ -56,7 +56,7 @@ static inline int lname_to_handle(const char *name, struct file_handle *fh, int 
 
 static inline int fd_to_handle(int fd, struct file_handle *fh, int *mnt_id)
 {
-	return syscall(341, fd, NULL, fh, mnt_id, 0);
+	return syscall(341, fd, "", fh, mnt_id, AT_EMPTY_PATH);
 }
 
 static inline int open_by_handle(int mountfd, struct file_handle *fh, int flags)
